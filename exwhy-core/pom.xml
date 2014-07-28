@@ -13,6 +13,14 @@
     <groupId>io.hgc</groupId>
     <artifactId>exwhy-core</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.hgc</groupId>
+            <artifactId>exwhy-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -112,15 +120,34 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jooq</groupId>
-                <artifactId>jooq-codegen-maven</artifactId>
-                <version>3.4.0</version>
+                <groupId>com.mysema.querydsl</groupId>
+                <artifactId>querydsl-maven-plugin</artifactId>
+                <version>${querydsl.version}</version>
                 <executions>
+                    <!--<execution>-->
+                        <!--<id>JPA</id>-->
+                        <!--<goals>-->
+                            <!--<goal>jpa-export</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<packages>-->
+                                <!--<package>io.hgc.exwhy.domain</package>-->
+                            <!--</packages>-->
+                            <!--<targetFolder>${project.build.directory}/generated-sources/java</targetFolder>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                     <execution>
-                        <phase>generate-sources</phase>
+                        <id>SQL</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>export</goal>
                         </goals>
+                        <configuration>
+                            <namePrefix>S</namePrefix>
+                            <jdbcDriver>org.hsqldb.jdbc.JDBCDriver</jdbcDriver>
+                            <jdbcUrl>jdbc:hsqldb:file:${project.build.directory}/hsqldb/db;shutdown=true</jdbcUrl>
+                            <packageName>io.hgc.exwhy.sql</packageName>
+                            <targetFolder>${project.build.directory}/generated-sources/java</targetFolder>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>
@@ -130,35 +157,6 @@
                         <version>${hsqldb.version}</version>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <jdbc>
-                        <driver>org.hsqldb.jdbc.JDBCDriver</driver>
-                        <url>jdbc:hsqldb:file:${project.build.directory}/hsqldb/db</url>
-                        <user>sa</user>
-                        <password></password>
-                    </jdbc>
-                    <generator>
-                        <name>org.jooq.util.JavaGenerator</name>
-                        <database>
-                            <name>org.jooq.util.hsqldb.HSQLDBDatabase</name>
-                            <includes>.*</includes>
-                            <excludes></excludes>
-                            <inputSchema>PUBLIC</inputSchema>
-                        </database>
-                        <target>
-                            <packageName>io.hgc.exwhy</packageName>
-                            <directory>${project.build.directory}/generated-sources/java</directory>
-                        </target>
-                        <generate>
-                            <deprecated>false</deprecated>
-                            <pojos>false</pojos>
-                            <interfaces>false</interfaces>
-                            <daos>false</daos>
-                            <jpaAnnotations>false</jpaAnnotations>
-                            <validationAnnotations>false</validationAnnotations>
-                        </generate>
-                    </generator>
-                </configuration>
             </plugin>
         </plugins>
     </build>
