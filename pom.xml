@@ -4,11 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>hgcummings</groupId>
+    <groupId>io.hgc</groupId>
     <artifactId>exwhy</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>exwhy-model</module>
+        <module>exwhy-core</module>
+    </modules>
 
     <properties>
+        <hibernate.version>4.3.5.Final</hibernate.version>
+        <hibernate.tools.version>4.3.1.CR1</hibernate.tools.version>
+        <slf4j.version>1.7.7</slf4j.version>
+        <hsqldb.version>2.3.2</hsqldb.version>
     </properties>
 
     <dependencies>
@@ -33,6 +42,11 @@
             <version>9.3-1101-jdbc41</version>
         </dependency>
         <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
+        </dependency>
+        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
             <version>1.1.0.Final</version>
@@ -48,6 +62,22 @@
             <version>3.3.2</version>
         </dependency>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+        </dependency>
+        <dependency>
+            <groupId>io.hgc</groupId>
+            <artifactId>jarspec</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+        <!-- Spring dependencies -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>3.2.4.RELEASE</version>
+        </dependency>
+        <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>2.3.2</version>
@@ -59,103 +89,5 @@
             <version>2.3.3</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.spockframework</groupId>
-            <artifactId>spock-core</artifactId>
-            <version>0.7-groovy-2.0</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <!-- Specify the maven code generator plugin -->
-                <groupId>org.jooq</groupId>
-                <artifactId>jooq-codegen-maven</artifactId>
-                <version>3.4.0</version>
-
-                <!-- The plugin should hook into the generate goal -->
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-
-                <!-- Manage the plugin's dependency. In this example, we'll use a PostgreSQL database -->
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>9.3-1101-jdbc41</version>
-                    </dependency>
-                </dependencies>
-
-                <!-- Specify the plugin configuration.
-                     The configuration format is the same as for the standalone code generator -->
-                <configuration>
-
-                    <!-- JDBC connection parameters -->
-                    <jdbc>
-                        <driver>org.postgresql.Driver</driver>
-                        <url>jdbc:postgresql://localhost:5432/exwhy</url>
-                        <user>${env.DB_USER}</user>
-                        <password>${env.DB_PASSWORD}</password>
-                    </jdbc>
-
-                    <!-- Generator parameters -->
-                    <generator>
-                        <name>org.jooq.util.JavaGenerator</name>
-                        <database>
-                            <name>org.jooq.util.postgres.PostgresDatabase</name>
-                            <includes> .*</includes>
-                            <excludes></excludes>
-                            <inputSchema>public</inputSchema>
-                        </database>
-                        <target>
-                            <packageName>io.hgc.exwhy</packageName>
-                            <directory>target/generated-sources/jooq</directory>
-                        </target>
-                        <generate>
-                            <deprecated>false</deprecated>
-                            <pojos>false</pojos>
-                            <interfaces>false</interfaces>
-                            <daos>false</daos>
-                            <jpaAnnotations>false</jpaAnnotations>
-                            <validationAnnotations>false</validationAnnotations>
-                        </generate>
-                    </generator>
-
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.gmaven.runtime</groupId>
-                        <artifactId>gmaven-runtime-2.0</artifactId>
-                        <version>1.5</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.codehaus.groovy</groupId>
-                                <artifactId>groovy-all</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>
