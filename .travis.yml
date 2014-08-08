@@ -8,3 +8,6 @@ deploy:
   app: exwhy-test
   on:
     repo: hgcummings/exwhy-spring
+cache:
+  directories:
+  - $HOME/.m2
