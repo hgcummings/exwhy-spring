@@ -1,0 +1,1 @@
+web: java $JAVA_OPTS -cp exwhy-web/target/classes:target/lib/* io.hgc.exwhy.web.Application
