@@ -20,15 +20,24 @@ import static org.junit.Assert.assertEquals;
 
 public class WebSpecBuilders {
     public static class WebSpecArrangeBuilder {
+        private static MockMvc mockMvc;
+
         public WebSpecActBuilder when() {
             return new WebSpecActBuilder(() -> {
-                AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-                context.register(Application.class);
-                MockServletContext servletContext = new MockServletContext();
-                servletContext.setContextPath("/exwhy");
-                context.setServletContext(servletContext);
-                return MockMvcBuilders.webAppContextSetup(context).build();
+                if (mockMvc == null) {
+                    mockMvc = createMockMvc();
+                }
+                return mockMvc;
             });
+        }
+
+        private static MockMvc createMockMvc() {
+            AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+            context.register(Application.class);
+            MockServletContext servletContext = new MockServletContext();
+            servletContext.setContextPath("/exwhy");
+            context.setServletContext(servletContext);
+            return MockMvcBuilders.webAppContextSetup(context).build();
         }
     }
 
