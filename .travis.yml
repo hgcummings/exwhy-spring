@@ -8,6 +8,4 @@ deploy:
   app: exwhy-test
   on:
     repo: hgcummings/exwhy-spring
-cache:
-  directories:
-  - $HOME/.m2
+after_deploy: mvn test -Dtest.server=http://exwhy-test.herokuapp.com/

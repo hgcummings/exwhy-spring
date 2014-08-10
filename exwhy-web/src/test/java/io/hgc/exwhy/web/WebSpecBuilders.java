@@ -1,8 +1,11 @@
 package io.hgc.exwhy.web;
 
+import com.gargoylesoftware.htmlunit.HttpWebConnection;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebConnection;
@@ -14,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
@@ -23,12 +27,17 @@ public class WebSpecBuilders {
         private static MockMvc mockMvc;
 
         public WebSpecActBuilder when() {
-            return new WebSpecActBuilder(() -> {
-                if (mockMvc == null) {
-                    mockMvc = createMockMvc();
-                }
-                return mockMvc;
-            });
+            String server = System.getProperty("test.server");
+            if (StringUtils.isBlank(server)) {
+                return new WebSpecActBuilder((webClient) -> {
+                    if (mockMvc == null) {
+                        mockMvc = createMockMvc();
+                    }
+                    return new MockMvcWebConnection(mockMvc);
+                });
+            } else {
+                return new WebSpecActBuilder(HttpWebConnection::new);
+            }
         }
 
         private static MockMvc createMockMvc() {
@@ -42,12 +51,12 @@ public class WebSpecBuilders {
     }
 
     public static class WebSpecActBuilder {
-        private Supplier<MockMvc> mockMvcSupplier;
+        private Function<WebClient, WebConnection> createWebConnection;
         private WebClient webClient;
 
-        public WebSpecActBuilder(Supplier<MockMvc> mockMvcSupplier)
+        public WebSpecActBuilder(Function<WebClient, WebConnection> createWebConnection)
         {
-            this.mockMvcSupplier = mockMvcSupplier;
+            this.createWebConnection = createWebConnection;
         }
 
         public WebRequestBuilder iVisit(String path) {
@@ -58,8 +67,16 @@ public class WebSpecBuilders {
             private UriBuilder uriBuilder;
 
             public WebRequestBuilder(String path) {
+                String rootUrl;
+                String server = System.getProperty("test.server");
+                if (StringUtils.isBlank(server)) {
+                    rootUrl = "http://mockmvc/exwhy";
+                } else {
+                    rootUrl = server;
+                }
+
                 this.uriBuilder = UriBuilder
-                    .fromPath("http://localhost/exwhy")
+                    .fromPath(rootUrl)
                     .path(path);
             }
 
@@ -71,7 +88,7 @@ public class WebSpecBuilders {
             public WebSpecAssertBuilder then() {
                 return new WebSpecAssertBuilder(() -> {
                     webClient = new WebClient();
-                    webClient.setWebConnection(new MockMvcWebConnection(mockMvcSupplier.get()));
+                    webClient.setWebConnection(createWebConnection.apply(webClient));
                     try {
                         return webClient.getPage(uriBuilder.build().toString());
                     } catch (IOException e) {
