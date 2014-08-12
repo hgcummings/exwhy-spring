@@ -16,6 +16,7 @@ dateRegionKey=`echo -n ${region} | openssl dgst -sha256 -mac Hmac -macopt hexkey
 dateRegionServiceKey=`echo -n ${service} | openssl dgst -sha256 -mac Hmac -macopt hexkey:${dateRegionKey} | cut -d ' ' -f 2`
 signingKey=`echo -n "aws4_request" | openssl dgst -sha256 -mac Hmac -macopt hexkey:${dateRegionServiceKey} | cut -d ' ' -f 2`
 signature=`echo -en ${stringToSign} | openssl dgst -sha256 -mac Hmac -macopt hexkey:${signingKey} | cut -d ' ' -f 2`
+md $M2_REPO
 cd $M2_REPO
 curl \
   -H "Host: ${bucket}.s3.amazonaws.com" \
