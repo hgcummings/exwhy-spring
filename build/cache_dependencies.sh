@@ -10,7 +10,6 @@ dateStamp=`date -u +%Y%m%d`
 contentHash=`cat dependencies${file} | openssl sha256 | cut -d ' ' -f 2`
 scope=${dateStamp}/${region}/${service}/aws4_request
 canonicalRequest="PUT\n${file}\n\nhost:${bucket}.s3.amazonaws.com\nx-amz-content-sha256:${contentHash}\nx-amz-date:${timeStamp}\n\nhost;x-amz-content-sha256;x-amz-date\n${contentHash}"
-echo -e ${canonicalRequest}
 hashedRequest=`echo -en ${canonicalRequest} | openssl sha256 | cut -d ' ' -f 2`
 stringToSign="AWS4-HMAC-SHA256\n${timeStamp}\n${scope}\n${hashedRequest}"
 initialKey=`echo -n "AWS4${AWS_SECRET_ACCESS_KEY}" | xxd -c 256 -ps`
