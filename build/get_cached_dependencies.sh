@@ -23,5 +23,4 @@ curl \
   -H "X-amz-date: ${timeStamp}"\
   -H "Authorization: AWS4-HMAC-SHA256 Credential=$AWS_ACCESS_KEY_ID/${scope},SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=${signature}" \
   http://${bucket}.s3.amazonaws.com${file} > cached.tar.bz2
-cat cached.tar.bz2
 tar -xjf cached.tar.bz2
