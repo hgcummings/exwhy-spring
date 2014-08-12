@@ -5,6 +5,7 @@ before_install: ./build/get_cached_dependencies.sh
 after_success: ./build/cache_dependencies.sh
 deploy:
   provider: heroku
+  strategy: git
   api_key:
     secure: J35uP587KqupZS0+ncJYg1K2aZXMtI6ykFuQlj4tq7WbxfsEf0GkMKksfyZY5LzkAvgOSRbTpA3xw7marzUGkrpjWhrnbXTBpxZ5JTDYyjRrmp3ru0jVliX609O2S4QbQwQb4RJV0wxF23vqTkx9cDQ0ZDhJ1Vzn7BMlOez7g9o=
   app: exwhy-test
