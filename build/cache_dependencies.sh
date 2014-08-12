@@ -1,2 +1,2 @@
 #!/bin/bash
-tar -cjf dependencies/cached.tar.bz2 $HOME/.m2
+tar -cjfv dependencies/cached.tar.bz2 $HOME/.m2
