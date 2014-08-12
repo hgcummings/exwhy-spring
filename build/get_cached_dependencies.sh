@@ -16,8 +16,8 @@ dateRegionKey=`echo -n ${region} | openssl dgst -sha256 -mac Hmac -macopt hexkey
 dateRegionServiceKey=`echo -n ${service} | openssl dgst -sha256 -mac Hmac -macopt hexkey:${dateRegionKey} | cut -d ' ' -f 2`
 signingKey=`echo -n "aws4_request" | openssl dgst -sha256 -mac Hmac -macopt hexkey:${dateRegionServiceKey} | cut -d ' ' -f 2`
 signature=`echo -en ${stringToSign} | openssl dgst -sha256 -mac Hmac -macopt hexkey:${signingKey} | cut -d ' ' -f 2`
-md $M2_REPO
-cd $M2_REPO
+mkdir dependencies
+cd dependencies
 curl \
   -H "Host: ${bucket}.s3.amazonaws.com" \
   -H "X-amz-content-sha256: ${emptyHash}" \
@@ -25,3 +25,5 @@ curl \
   -H "Authorization: AWS4-HMAC-SHA256 Credential=$AWS_ACCESS_KEY_ID/${scope},SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=${signature}" \
   http://${bucket}.s3.amazonaws.com${file} > cached.tar.bz2
 tar -xjf cached.tar.bz2
+cp -r . $HOME/.m2
+cd .. rm -rf dependencies
