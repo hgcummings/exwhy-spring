@@ -4,14 +4,20 @@ jdk:
 before_install: ./build/get_cached_dependencies.sh
 after_success: ./build/cache_dependencies.sh
 deploy:
-  provider: heroku
-  api_key:
-    secure: J35uP587KqupZS0+ncJYg1K2aZXMtI6ykFuQlj4tq7WbxfsEf0GkMKksfyZY5LzkAvgOSRbTpA3xw7marzUGkrpjWhrnbXTBpxZ5JTDYyjRrmp3ru0jVliX609O2S4QbQwQb4RJV0wxF23vqTkx9cDQ0ZDhJ1Vzn7BMlOez7g9o=
-  app: exwhy-test
-  on:
-    repo: hgcummings/exwhy-spring
+  - provider: heroku
+    api_key:
+      secure: J35uP587KqupZS0+ncJYg1K2aZXMtI6ykFuQlj4tq7WbxfsEf0GkMKksfyZY5LzkAvgOSRbTpA3xw7marzUGkrpjWhrnbXTBpxZ5JTDYyjRrmp3ru0jVliX609O2S4QbQwQb4RJV0wxF23vqTkx9cDQ0ZDhJ1Vzn7BMlOez7g9o=
+    app: exwhy-test
+    on:
+      repo: hgcummings/exwhy-spring
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY_ID
+    bucket: $AWS_BUCKET
+    local-dir: dependencies
 after_deploy: mvn test -Dtest.server=http://exwhy-test.herokuapp.com/
 env:
   global:
+  - AWS_BUCKET: exwhy_dependencies
   - secure: ftpiRObvz5C4grgJouP9YZNbbUudI2cKoOb/Z/BFZUhvwGi56wv+NyT4v1dPvcO6zt0Un544AofHW+MiTQv93wYMcso5EHznqDjwEujqG5Ulo7G1CeXbszOpDQmfU6mE+JdPpF888jHb4hbPFF1hYHfcW7u7/gkpZVn6Sax7XTo=
   - secure: bK8rdfAgEGOWFUN22Tn1rbpA5GInWT70qsShFVc71OClekD3Z2xvPkCV+JTVbV3Ivimt2ACT+/LZtI0SxOjuAm74uKjTjPaEDyDlOYTOucaUc7B7Zmoje1Y31mFklcnSJqJSyUe7SC3ECuL+uId6EHpf1Zpt1BPfAE99dMeuvnI=
