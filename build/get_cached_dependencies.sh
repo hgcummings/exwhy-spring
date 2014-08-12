@@ -16,12 +16,11 @@ dateRegionKey=`echo -n ${region} | openssl dgst -sha256 -mac Hmac -macopt hexkey
 dateRegionServiceKey=`echo -n ${service} | openssl dgst -sha256 -mac Hmac -macopt hexkey:${dateRegionKey} | cut -d ' ' -f 2`
 signingKey=`echo -n "aws4_request" | openssl dgst -sha256 -mac Hmac -macopt hexkey:${dateRegionServiceKey} | cut -d ' ' -f 2`
 signature=`echo -en ${stringToSign} | openssl dgst -sha256 -mac Hmac -macopt hexkey:${signingKey} | cut -d ' ' -f 2`
+cd $HOME/.m2
 curl \
   -H "Host: ${bucket}.s3.amazonaws.com" \
   -H "X-amz-content-sha256: ${emptyHash}" \
   -H "X-amz-date: ${timeStamp}"\
   -H "Authorization: AWS4-HMAC-SHA256 Credential=$AWS_ACCESS_KEY_ID/${scope},SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=${signature}" \
   http://${bucket}.s3.amazonaws.com${file} > dependencies/cached.tar.bz2
-tar -xjf cached.tar.bz2
-rm dependencies/cached.tar.bz2
-cp -r dependencies $HOME/.m2
+tar --no-overwrite-dir -xjf cached.tar.bz2
