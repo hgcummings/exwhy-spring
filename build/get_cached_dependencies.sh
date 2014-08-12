@@ -24,8 +24,8 @@ responseCode=$(curl \
   -o .${file} \
   -w "%{http_code}" \
   http://${bucket}.s3.amazonaws.com${file})
-echo ${responseCode}
 if test ${responseCode} -ne 200; then
+  echo -n "${responseCode} "
   cat .${file}
 else
   tar --no-overwrite-dir -xjf .${file} -C $HOME/.m2
