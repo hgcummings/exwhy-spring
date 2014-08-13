@@ -1,40 +1,56 @@
 #!/bin/bash
 dependencyFolder=$HOME/.m2
-bucket=$AWS_BUCKET
 file="/cached.tar.bz2"
 region="us-east-1"
+tempFolder="dependencies"
 
 service="s3"
 timeStamp=$(date -u +%Y%m%dT%H%M%SZ)
 dateStamp=$(date -u +%Y%m%d)
 scope=${dateStamp}/${region}/${service}/aws4_request
-host="${bucket}.s3.amazonaws.com"
+host="${AWS_BUCKET}.s3.amazonaws.com"
 url="http://${host}${file}"
 
 function cacheDependencies {
-    mkdir dependencies
-    tar -cjf dependencies${file} ${dependencyFolder}
+    compressDependencies
+    uploadArchive
+}
+
+function getCachedDependencies {
+    downloadArchive
+    extractDependencies
+}
+
+function compressDependencies {
+    mkdir ${tempFolder}
+    tar -cjf ${tempFolder}${file} ${dependencyFolder}
+}
+
+function uploadArchive {
     contentHash=$(cat dependencies${file} | openssl sha256 | trimOpenSslOutput)
     authHeader=$(generateAuthHeaderForMethod "PUT")
     curl -X PUT -T "dependencies${file}" \
-      -H "Host: ${bucket}.s3.amazonaws.com" \
+      -H "Host: ${host}" \
       -H "X-amz-content-sha256: ${contentHash}" \
       -H "X-amz-date: ${timeStamp}" \
       -H "Authorization: ${authHeader}" \
       ${url}
 }
 
-function getCachedDependencies {
+function downloadArchive {
     contentHash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     authHeader=$(generateAuthHeaderForMethod "GET")
     responseCode=$(curl \
-      -H "Host: ${bucket}.s3.amazonaws.com" \
+      -H "Host: ${host}" \
       -H "X-amz-content-sha256: ${contentHash}" \
       -H "X-amz-date: ${timeStamp}" \
       -H "Authorization: ${authHeader}" \
       -o .${file} \
       -w "%{http_code}" \
       ${url})
+}
+
+function extractDependencies {
     if test ${responseCode} -ne 200; then
         echo -n "${responseCode} "
         cat .${file}

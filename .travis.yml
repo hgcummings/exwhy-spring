@@ -2,7 +2,7 @@ language: java
 jdk:
 - oraclejdk8
 before_install: source ./build/s3_caching.sh && getCachedDependencies
-after_success: source ./build/s3_caching.sh && cacheDependencies
+after_success: cacheDependencies
 deploy:
   provider: heroku
   strategy: git
