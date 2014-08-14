@@ -3,6 +3,7 @@
 mkdir app
 cp -r ./exwhy-web/target/classes ./app/classes
 cp -r ./exwhy-web/target/lib ./app/lib
+cp system.properties ./app
 tar czfv slug.tgz ./app
 apiKey=`echo ":${HEROKU_API_KEY}" | base64`
 
