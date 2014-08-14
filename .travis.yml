@@ -2,6 +2,7 @@ language: java
 jdk:
 - oraclejdk8
 before_install: source ./build/s3_caching.sh && getCachedDependencies
+install: true
 script: mvn clean install && ./build/heroku_deploy.sh && mvn test -Dtest.server=http://exwhy-test.herokuapp.com
 after_success: cacheDependencies
 env:
@@ -9,3 +10,4 @@ env:
   - AWS_BUCKET: exwhy-dependencies
   - secure: ftpiRObvz5C4grgJouP9YZNbbUudI2cKoOb/Z/BFZUhvwGi56wv+NyT4v1dPvcO6zt0Un544AofHW+MiTQv93wYMcso5EHznqDjwEujqG5Ulo7G1CeXbszOpDQmfU6mE+JdPpF888jHb4hbPFF1hYHfcW7u7/gkpZVn6Sax7XTo=
   - secure: bK8rdfAgEGOWFUN22Tn1rbpA5GInWT70qsShFVc71OClekD3Z2xvPkCV+JTVbV3Ivimt2ACT+/LZtI0SxOjuAm74uKjTjPaEDyDlOYTOucaUc7B7Zmoje1Y31mFklcnSJqJSyUe7SC3ECuL+uId6EHpf1Zpt1BPfAE99dMeuvnI=
+  - secure: VbnFFG3QeV1fQlRZHBK0q0DLME6s+DeTUn+UJoInirttHU1fWdtfnfaH9BtFCzLi09X3HFMK/wV9QO4VgCi1+IfuY8GisleL2v42Lipkyc5nns1DAOKv9SwLDKQvIj062WVZ6Mhx5bfBVpDHx1Rv8o4h09QU6eTz0g+MsK28grQ=
