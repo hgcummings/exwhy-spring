@@ -7,6 +7,7 @@ script: mvn clean install && ./build/heroku_deploy.sh && mvn test -Dtest.server=
 after_success: cacheDependencies
 env:
   global:
+  - HEROKU_APP_NAME: exwhy-test
   - AWS_BUCKET: exwhy-dependencies
   - secure: ftpiRObvz5C4grgJouP9YZNbbUudI2cKoOb/Z/BFZUhvwGi56wv+NyT4v1dPvcO6zt0Un544AofHW+MiTQv93wYMcso5EHznqDjwEujqG5Ulo7G1CeXbszOpDQmfU6mE+JdPpF888jHb4hbPFF1hYHfcW7u7/gkpZVn6Sax7XTo=
   - secure: bK8rdfAgEGOWFUN22Tn1rbpA5GInWT70qsShFVc71OClekD3Z2xvPkCV+JTVbV3Ivimt2ACT+/LZtI0SxOjuAm74uKjTjPaEDyDlOYTOucaUc7B7Zmoje1Y31mFklcnSJqJSyUe7SC3ECuL+uId6EHpf1Zpt1BPfAE99dMeuvnI=

@@ -12,17 +12,13 @@ response=$(curl -X POST \
 -H "Accept: application/vnd.heroku+json; version=3" \
 -H "Authorization: ${apiKey}" \
 -d '{"process_types":{"web": "java $JAVA_OPTS -cp ./classes:./lib/* io.hgc.exwhy.web.Application"}}' \
--n https://api.heroku.com/apps/${APP_NAME}/slugs)
-
-echo ${response}
+-n https://api.heroku.com/apps/${HEROKU_APP_NAME}/slugs)
 
 function parseField {
     echo -ne $2 | grep -o "\"$1\"\s*:\s*\"[^\"]*\"" | head -1 | cut -d '"' -f 4
 }
 s3Url=$(parseField "url" "'${response}'")
-echo ${s3Url}
 slugId=$(parseField "id" "'${response}'")
-echo ${slugId}
 
 # Upload archive
 curl -X PUT -H "Content-Type:" --data-binary @slug.tgz ${s3Url}
@@ -33,4 +29,4 @@ curl -X POST \
 -H "Accept: application/vnd.heroku+json; version=3" \
 -H "Authorization: ${apiKey}" \
 -d "{\"slug\":\"${slugId}\"}" \
--n https://api.heroku.com/apps/${APP_NAME}/releases
+-n https://api.heroku.com/apps/${HEROKU_APP_NAME}/releases
