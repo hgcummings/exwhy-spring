@@ -1,10 +1,4 @@
 #!/bin/bash
-# Debug
-echo "Begin debug output ..."
-echo "JAVA_HOME = ${JAVA_HOME}"
-ls ${JAVA_HOME}
-echo "... End debug output"
-
 # Create slug archive
 mkdir app
 cp -r ./exwhy-web/target/classes ./app/classes
@@ -17,7 +11,7 @@ jdkTarball="${jdkDir}"/jdk.tar.gz
 curl --silent --location ${jdkUrl} --output ${jdkTarball}
 tar pxzf ${jdkTarball} -C "${jdkDir}"
 rm ${jdkTarball}
-mkdir "app/profile.d"
+mkdir "app/.profile.d"
 echo 'export PATH="/app/.jdk/bin:$PATH"' >> app/.profile.d/java.sh
 chmod 755 app/.profile.d/java.sh
 
