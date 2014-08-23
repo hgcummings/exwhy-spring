@@ -16,7 +16,7 @@ response=$(curl -X POST \
 -H "Accept: application/vnd.heroku+json; version=3" \
 -H "Authorization: ${apiKey}" \
 -d '{"process_types":{"web": "java $JAVA_OPTS -cp ./classes:./lib/* io.hgc.exwhy.web.Application"}}' \
--n https://api.heroku.com/apps/${HEROKU_APP_NAME}/slugs)
+-n https://api.heroku.com/apps/${HEROKU_APP_NAME_STAGE}/slugs)
 
 function parseField {
     echo -ne $2 | grep -o "\"$1\"\s*:\s*\"[^\"]*\"" | head -1 | cut -d '"' -f 4
@@ -28,9 +28,13 @@ slugId=$(parseField "id" "'${response}'")
 curl -X PUT -H "Content-Type:" --data-binary @slug.tgz ${s3Url}
 
 # Deploy slug
-curl -X POST \
--H "Content-Type: application/json" \
--H "Accept: application/vnd.heroku+json; version=3" \
--H "Authorization: ${apiKey}" \
--d "{\"slug\":\"${slugId}\"}" \
--n https://api.heroku.com/apps/${HEROKU_APP_NAME}/releases
+function deploy {
+    curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/vnd.heroku+json; version=3" \
+    -H "Authorization: ${apiKey}" \
+    -d "{\"slug\":\"${slugId}\"}" \
+    -n https://api.heroku.com/apps/$1/releases
+}
+
+deploy ${HEROKU_APP_NAME_STAGE}
