@@ -4,7 +4,8 @@ jdk:
 before_install: source ./build/s3_caching.sh && getCachedDependencies
 install: true
 script: mvn clean install && source ./build/heroku_deploy.sh && mvn test -Dtest.server=http://$HEROKU_APP_NAME_STAGE.herokuapp.com
-after_success: cacheDependencies && deployToHeroku $HEROKU_APP_NAME_LIVE
+after_success: deployToHeroku $HEROKU_APP_NAME_LIVE
+after_script: cacheDependencies
 env:
   global:
   - HEROKU_APP_NAME_STAGE: exwhy-test
