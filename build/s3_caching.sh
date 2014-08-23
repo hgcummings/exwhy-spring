@@ -15,7 +15,7 @@ signedHeaders="host;x-amz-content-sha256;x-amz-date"
 url="http://${host}${file}"
 
 function cacheDependencies {
-    if [[ -n $(git diff HEAD^1 pom.xml **/pom.xml) ]]; then
+    if [[ -n $(changesToPomFiles) ]]; then
         echo "pom.xml changed in last commit - updating cached dependencies"
         compressDependencies
         uploadArchive
@@ -23,11 +23,16 @@ function cacheDependencies {
 }
 
 function getCachedDependencies {
-    if [[ -z $(git diff HEAD^1 pom.xml **/pom.xml) ]]; then
+    if [[ -z $(changesToPomFiles) ]]; then
         echo "pom.xml unchanged in last commit - using cached dependencies"
         downloadArchive
         extractDependencies
     fi
+}
+
+function changesToPomFiles {
+    echo ${TRAVIS_COMMIT_RANGE}
+    git diff ${TRAVIS_COMMIT_RANGE} pom.xml **/pom.xml
 }
 
 function compressDependencies {
