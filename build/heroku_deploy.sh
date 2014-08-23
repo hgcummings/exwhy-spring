@@ -7,7 +7,7 @@ cp -r ${JAVA_HOME}/jre ./app/.jre
 mkdir "app/.profile.d" && echo 'export PATH="/app/.jre/bin:$PATH"' >> app/.profile.d/java.sh
 
 # Archive slug
-tar czfv slug.tgz ./app
+tar -czf slug.tgz ./app
 _heroku_deploy_apiKey=`echo ":${HEROKU_API_KEY}" | base64`
 
 # Create slug object
