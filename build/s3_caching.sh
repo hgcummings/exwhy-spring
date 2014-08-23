@@ -14,40 +14,24 @@ key=$(echo -n "AWS4${AWS_SECRET_ACCESS_KEY}" | xxd -c 256 -ps)
 signedHeaders="host;x-amz-content-sha256;x-amz-date"
 url="http://${host}${file}"
 
-function cacheDependencies {
-    if [[ -n $(changesToPomFiles) ]]; then
-        echo "pom.xml changed in last commit - updating cached dependencies"
-        compressDependencies
-        uploadArchive
-    fi
-}
-
 function getCachedDependencies {
-    if [[ -z $(changesToPomFiles) ]]; then
-        echo "pom.xml unchanged in last commit - using cached dependencies"
+    if [[ -z $(diffPomFiles) ]]; then
+        echo "pom.xml files unchanged - using cached dependencies"
         downloadArchive
         extractDependencies
     fi
 }
 
-function changesToPomFiles {
+function cacheDependencies {
+    if [[ -n $(diffPomFiles) ]]; then
+        echo "pom.xml files have changed - updating cached dependencies"
+        compressDependencies
+        uploadArchive
+    fi
+}
+
+function diffPomFiles {
     git diff ${TRAVIS_COMMIT_RANGE} pom.xml **/pom.xml
-}
-
-function compressDependencies {
-    mkdir ${tempFolder}
-    tar -cjf ${tempFolder}${file} ${dependencyFolder}
-}
-
-function uploadArchive {
-    contentHash=$(cat dependencies${file} | openssl sha256 | trimOpenSslOutput)
-    authHeader=$(generateAuthHeaderForHttpMethod "PUT")
-    curl -X PUT -T "dependencies${file}" \
-      -H "Host: ${host}" \
-      -H "X-amz-content-sha256: ${contentHash}" \
-      -H "X-amz-date: ${timeStamp}" \
-      -H "Authorization: ${authHeader}" \
-      ${url}
 }
 
 function downloadArchive {
@@ -70,6 +54,22 @@ function extractDependencies {
     else
         tar --no-overwrite-dir -xjf .${file} -C /
     fi
+}
+
+function compressDependencies {
+    mkdir ${tempFolder}
+    tar -cjf ${tempFolder}${file} ${dependencyFolder}
+}
+
+function uploadArchive {
+    contentHash=$(cat dependencies${file} | openssl sha256 | trimOpenSslOutput)
+    authHeader=$(generateAuthHeaderForHttpMethod "PUT")
+    curl -X PUT -T "dependencies${file}" \
+      -H "Host: ${host}" \
+      -H "X-amz-content-sha256: ${contentHash}" \
+      -H "X-amz-date: ${timeStamp}" \
+      -H "Authorization: ${authHeader}" \
+      ${url}
 }
 
 function generateAuthHeaderForHttpMethod {
