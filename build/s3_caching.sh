@@ -14,6 +14,9 @@ key=$(echo -n "AWS4${AWS_SECRET_ACCESS_KEY}" | xxd -c 256 -ps)
 signedHeaders="host;x-amz-content-sha256;x-amz-date"
 url="http://${host}${file}"
 
+echo "Commit range ${TRAVIS_COMMIT_RANGE}"
+git diff ${TRAVIS_COMMIT_RANGE} pom.xml **/pom.xml
+
 function cacheDependencies {
     if [[ -n $(changesToPomFiles) ]]; then
         echo "pom.xml changed in last commit - updating cached dependencies"
@@ -31,7 +34,6 @@ function getCachedDependencies {
 }
 
 function changesToPomFiles {
-    echo ${TRAVIS_COMMIT_RANGE}
     git diff ${TRAVIS_COMMIT_RANGE} pom.xml **/pom.xml
 }
 
