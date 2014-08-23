@@ -1,7 +1,6 @@
 #!/bin/bash
 _s3_caching_dependencyFolder=$HOME/.m2
-_s3_caching_file="/cached.tar.bz2"
-_s3_caching_tempFolder="dependencies"
+_s3_caching_file="cached.tar.bz2"
 
 _s3_caching_timeStamp=$(date -u +%Y%m%dT%H%M%SZ)
 _s3_caching_dateStamp=$(date -u +%Y%m%d)
@@ -12,7 +11,7 @@ _s3_caching_host="${AWS_BUCKET}.s3.amazonaws.com"
 _s3_caching_credential="${AWS_ACCESS_KEY_ID}/${_s3_caching_scope}"
 _s3_caching_key=$(echo -n "AWS4${AWS_SECRET_ACCESS_KEY}" | xxd -c 256 -ps)
 _s3_caching_signedHeaders="host;x-amz-content-sha256;x-amz-date"
-_s3_caching_url="http://${_s3_caching_host}${_s3_caching_file}"
+_s3_caching_url="http://${_s3_caching_host}/${_s3_caching_file}"
 
 function getCachedDependencies {
     if [[ -z $(_s3_caching_diffPomFiles) ]]; then
@@ -42,7 +41,7 @@ function _s3_caching_downloadArchive {
       -H "X-amz-content-sha256: ${_s3_caching_contentHash}" \
       -H "X-amz-date: ${_s3_caching_timeStamp}" \
       -H "Authorization: ${_s3_caching_authHeader}" \
-      -o .${_s3_caching_file} \
+      -o ${_s3_caching_file} \
       -w "%{http_code}" \
       ${_s3_caching_url})
 }
@@ -50,21 +49,20 @@ function _s3_caching_downloadArchive {
 function _s3_caching_extractDependencies {
     if test ${_s3_caching_responseCode} -ne 200; then
         echo -n "${_s3_caching_responseCode} "
-        cat .${_s3_caching_file}
+        cat ${_s3_caching_file}
     else
-        tar --no-overwrite-dir -xjf .${_s3_caching_file} -C /
+        tar --no-overwrite-dir -xjf ${_s3_caching_file} -C /
     fi
 }
 
 function _s3_caching_compressDependencies {
-    mkdir ${_s3_caching_tempFolder}
-    tar -cjf ${_s3_caching_tempFolder}${_s3_caching_file} ${_s3_caching_dependencyFolder}
+    tar -cjf ${_s3_caching_file} ${_s3_caching_dependencyFolder}
 }
 
 function _s3_caching_uploadArchive {
-    _s3_caching_contentHash=$(cat dependencies${_s3_caching_file} | openssl sha256 | _s3_caching_trimOpenSslOutput)
+    _s3_caching_contentHash=$(cat ${_s3_caching_file} | openssl sha256 | _s3_caching_trimOpenSslOutput)
     _s3_caching_authHeader=$(_s3_caching_generateAuthHeaderForHttpMethod "PUT")
-    curl -X PUT -T "dependencies${_s3_caching_file}" \
+    curl -X PUT -T "${_s3_caching_file}" \
       -H "Host: ${_s3_caching_host}" \
       -H "X-amz-content-sha256: ${_s3_caching_contentHash}" \
       -H "X-amz-date: ${_s3_caching_timeStamp}" \
@@ -73,7 +71,7 @@ function _s3_caching_uploadArchive {
 }
 
 function _s3_caching_generateAuthHeaderForHttpMethod {
-    _s3_caching_canonicalRequest="$1\n${_s3_caching_file}\n\n"
+    _s3_caching_canonicalRequest="$1\n/${_s3_caching_file}\n\n"
     _s3_caching_canonicalRequest+="host:${_s3_caching_host}\nx-amz-content-sha256:${_s3_caching_contentHash}\nx-amz-date:${_s3_caching_timeStamp}\n\n"
     _s3_caching_canonicalRequest+="${_s3_caching_signedHeaders}\n${_s3_caching_contentHash}"
     echo $(_s3_caching_generateAuthHeaderForCanonicalRequest ${_s3_caching_canonicalRequest})
