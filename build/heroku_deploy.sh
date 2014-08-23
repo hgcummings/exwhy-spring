@@ -18,7 +18,8 @@ curl --silent --location ${jdkUrl} --output ${jdkTarball}
 tar pxzf ${jdkTarball} -C "${jdkDir}"
 rm ${jdkTarball}
 mkdir "app/profile.d"
-echo 'export PATH="/app/.jdk/bin:$PATH"' >> app/profile.d/java.sh
+echo 'export PATH="/app/.jdk/bin:$PATH"' >> app/.profile.d/java.sh
+chmod 755 app/.profile.d/java.sh
 
 tar czfv slug.tgz ./app
 apiKey=`echo ":${HEROKU_API_KEY}" | base64`
