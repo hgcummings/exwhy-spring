@@ -3,7 +3,7 @@ jdk:
 - oraclejdk8
 before_install: source ./build/s3_caching.sh && getCachedDependencies
 install: true
-script: mvn clean install && source ./build/heroku_deploy.sh && mvn test -Dtest.server=http://${HEROKU_APP_NAME_STAGE}.herokuapp.com
+script: mvn clean install && source ./build/heroku_deploy.sh && mvn test -Dtest.server=http://$HEROKU_APP_NAME_STAGE.herokuapp.com
 after_success: cacheDependencies && deploy $HEROKU_APP_NAME_LIVE
 env:
   global:
