@@ -68,18 +68,6 @@
         </dependency>
     </dependencies>
 
-    <!--<dependencyManagement>-->
-        <!--<dependencies>-->
-            <!--<dependency>-->
-                <!--<groupId>org.springframework</groupId>-->
-                <!--<artifactId>spring-framework-bom</artifactId>-->
-                <!--<version>4.0.9.RELEASE</version>-->
-                <!--<type>pom</type>-->
-                <!--<scope>import</scope>-->
-            <!--</dependency>-->
-        <!--</dependencies>-->
-    <!--</dependencyManagement>-->
-
     <build>
         <plugins>
             <plugin>
