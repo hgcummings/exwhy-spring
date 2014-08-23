@@ -3,16 +3,8 @@ jdk:
 - oraclejdk8
 before_install: source ./build/s3_caching.sh && getCachedDependencies
 install: true
+script: mvn clean install && ./build/heroku_deploy.sh && mvn test -Dtest.server=http://exwhy-test.herokuapp.com
 after_success: cacheDependencies
-deploy:
-  provider: heroku
-  strategy: git
-  api_key:
-    secure: J35uP587KqupZS0+ncJYg1K2aZXMtI6ykFuQlj4tq7WbxfsEf0GkMKksfyZY5LzkAvgOSRbTpA3xw7marzUGkrpjWhrnbXTBpxZ5JTDYyjRrmp3ru0jVliX609O2S4QbQwQb4RJV0wxF23vqTkx9cDQ0ZDhJ1Vzn7BMlOez7g9o=
-  app: exwhy-test
-  on:
-    repo: hgcummings/exwhy-spring
-after_deploy: mvn test -Dtest.server=http://exwhy-test.herokuapp.com
 env:
   global:
   - HEROKU_APP_NAME: exwhy-test

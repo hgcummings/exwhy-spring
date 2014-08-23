@@ -1,9 +1,25 @@
 #!/bin/bash
+# Debug
+echo "Begin debug output ..."
+echo "JAVA_HOME = ${JAVA_HOME}"
+ls ${JAVA_HOME}
+echo "... End debug output"
+
 # Create slug archive
 mkdir app
 cp -r ./exwhy-web/target/classes ./app/classes
 cp -r ./exwhy-web/target/lib ./app/lib
-cp system.properties ./app
+
+jdkUrl="http://heroku-jdk.s3.amazonaws.com/openjdk1.8.0_b107.tar.gz"
+jdkDir="app/.jdk"
+mkdir ${jdkDir}
+jdkTarball="${jdkDir}"/jdk.tar.gz
+curl --silent --location ${jdkUrl} --output ${jdkTarball}
+tar pxzf ${jdkTarball} -C "${jdkDir}"
+rm ${jdkTarball}
+mkdir "app/profile.d"
+echo 'export PATH="/app/.jdk/bin:$PATH"' >> app/profile.d/java.sh
+
 tar czfv slug.tgz ./app
 apiKey=`echo ":${HEROKU_API_KEY}" | base64`
 
