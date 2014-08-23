@@ -6,7 +6,7 @@ cp -r ./exwhy-web/target/classes ./app/classes
 cp -r ./exwhy-web/target/lib ./app/lib
 
 # ... JDK/JRE
-cp -r ${JAVA_HOME}/jre ./app/jre
+cp -r ${JAVA_HOME}/jre ./app/.jre
 
 # ... config
 mkdir "app/.profile.d"
