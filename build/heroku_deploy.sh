@@ -1,17 +1,10 @@
 #!/bin/bash
-# Prepare slug contents...
-# ... application
+# Prepare slug contents
 mkdir app
 cp -r ./exwhy-web/target/classes ./app/classes
 cp -r ./exwhy-web/target/lib ./app/lib
-
-# ... JDK/JRE
 cp -r ${JAVA_HOME}/jre ./app/.jre
-
-# ... config
-mkdir "app/.profile.d"
-echo 'export PATH="/app/.jre/bin:$PATH"' >> app/.profile.d/java.sh
-chmod 755 app/.profile.d/java.sh
+mkdir "app/.profile.d" && echo 'export PATH="/app/.jre/bin:$PATH"' >> app/.profile.d/java.sh
 
 # Archive slug
 tar czfv slug.tgz ./app
