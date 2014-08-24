@@ -34,13 +34,13 @@ function _s3_caching_diffPomFiles {
 }
 
 function _s3_caching_downloadArchive {
-    _s3_caching_contentHash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    _s3_caching_authHeader=$(_s3_caching_generateAuthHeaderForHttpMethod "GET")
+    local contentHash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    local authHeader=$(_s3_caching_generateCanonicalRequest "GET" contentHash)
     _s3_caching_responseCode=$(curl \
       -H "Host: ${_s3_caching_host}" \
-      -H "X-amz-content-sha256: ${_s3_caching_contentHash}" \
+      -H "X-amz-content-sha256: ${contentHash}" \
       -H "X-amz-date: ${_s3_caching_timeStamp}" \
-      -H "Authorization: ${_s3_caching_authHeader}" \
+      -H "Authorization: ${authHeader}" \
       -o ${_s3_caching_file} \
       -w "%{http_code}" \
       ${_s3_caching_url})
@@ -60,32 +60,32 @@ function _s3_caching_compressDependencies {
 }
 
 function _s3_caching_uploadArchive {
-    _s3_caching_contentHash=$(cat ${_s3_caching_file} | openssl sha256 | _s3_caching_trimOpenSslOutput)
-    _s3_caching_authHeader=$(_s3_caching_generateAuthHeaderForHttpMethod "PUT")
+    local contentHash=$(cat ${_s3_caching_file} | openssl sha256 | _s3_caching_trimOpenSslOutput)
+    local authHeader=$(_s3_caching_generateAuthHeader $(_s3_caching_generateCanonicalRequest "PUT" contentHash))
     curl -X PUT -T "${_s3_caching_file}" \
       -H "Host: ${_s3_caching_host}" \
-      -H "X-amz-content-sha256: ${_s3_caching_contentHash}" \
+      -H "X-amz-content-sha256: ${contentHash}" \
       -H "X-amz-date: ${_s3_caching_timeStamp}" \
-      -H "Authorization: ${_s3_caching_authHeader}" \
+      -H "Authorization: ${authHeader}" \
       ${_s3_caching_url}
 }
 
-function _s3_caching_generateAuthHeaderForHttpMethod {
-    _s3_caching_canonicalRequest="$1\n/${_s3_caching_file}\n\n"
-    _s3_caching_canonicalRequest+="host:${_s3_caching_host}\nx-amz-content-sha256:${_s3_caching_contentHash}\nx-amz-date:${_s3_caching_timeStamp}\n\n"
-    _s3_caching_canonicalRequest+="${_s3_caching_signedHeaders}\n${_s3_caching_contentHash}"
-    echo $(_s3_caching_generateAuthHeaderForCanonicalRequest ${_s3_caching_canonicalRequest})
+function _s3_caching_generateCanonicalRequest { # Args: HTTP method, content hash
+    local canonicalRequest="$1\n/${_s3_caching_file}\n\n"
+    canonicalRequest+="host:${_s3_caching_host}\nx-amz-content-sha256:$2\nx-amz-date:${_s3_caching_timeStamp}\n\n"
+    canonicalRequest+="${_s3_caching_signedHeaders}\n$2"
+    echo ${canonicalRequest};
 }
 
-function _s3_caching_generateAuthHeaderForCanonicalRequest {
-    _s3_caching_hashedRequest=$(echo -en $1 | openssl sha256 | _s3_caching_trimOpenSslOutput)
-    _s3_caching_stringToSign="AWS4-HMAC-SHA256\n${_s3_caching_timeStamp}\n${_s3_caching_scope}\n${_s3_caching_hashedRequest}"
-    _s3_caching_signature=$(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash \
-      ${_s3_caching_key} ${_s3_caching_dateStamp}) ${_s3_caching_region}) ${_s3_caching_service}) "aws4_request") ${_s3_caching_stringToSign})
-    echo "AWS4-HMAC-SHA256 Credential=${_s3_caching_credential},SignedHeaders=${_s3_caching_signedHeaders},Signature=${_s3_caching_signature}"
+function _s3_caching_generateAuthHeader { #Args: canonical request
+    local hashedRequest=$(echo -en $1 | openssl sha256 | _s3_caching_trimOpenSslOutput)
+    local stringToSign="AWS4-HMAC-SHA256\n${_s3_caching_timeStamp}\n${_s3_caching_scope}\n${hashedRequest}"
+    local signature=$(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash \
+      ${_s3_caching_key} ${_s3_caching_dateStamp}) ${_s3_caching_region}) ${_s3_caching_service}) "aws4_request") ${stringToSign})
+    echo "AWS4-HMAC-SHA256 Credential=${_s3_caching_credential},SignedHeaders=${_s3_caching_signedHeaders},Signature=${signature}"
 }
 
-function _s3_caching_sha256Hash {
+function _s3_caching_sha256Hash { #Args: hex key, data
     echo -en $2 | openssl dgst -sha256 -mac Hmac -macopt hexkey:$1 | _s3_caching_trimOpenSslOutput
 }
 

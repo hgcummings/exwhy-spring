@@ -27,7 +27,7 @@ _heroku_deploy_slugId=$(_heroku_deploy_parseField "id" "'${_heroku_deploy_create
 echo "Uploading slug archive"
 curl -X PUT -H "Content-Type:" --data-binary @slug.tgz ${_heroku_deploy_slugS3Url}
 
-function deployToHeroku {
+function deployToHeroku { #Args: application name
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/vnd.heroku+json; version=3" \
