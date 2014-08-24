@@ -35,7 +35,7 @@ function _s3_caching_diffPomFiles {
 
 function _s3_caching_downloadArchive {
     local contentHash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    local authHeader=$(_s3_caching_generateCanonicalRequest "GET" contentHash)
+    local authHeader=$(_s3_caching_generateAuthHeader "GET" ${contentHash})
     _s3_caching_responseCode=$(curl \
       -H "Host: ${_s3_caching_host}" \
       -H "X-amz-content-sha256: ${contentHash}" \
@@ -61,7 +61,7 @@ function _s3_caching_compressDependencies {
 
 function _s3_caching_uploadArchive {
     local contentHash=$(cat ${_s3_caching_file} | openssl sha256 | _s3_caching_trimOpenSslOutput)
-    local authHeader=$(_s3_caching_generateAuthHeader $(_s3_caching_generateCanonicalRequest "PUT" contentHash))
+    local authHeader=$(_s3_caching_generateAuthHeader "PUT" ${contentHash})
     curl -X PUT -T "${_s3_caching_file}" \
       -H "Host: ${_s3_caching_host}" \
       -H "X-amz-content-sha256: ${contentHash}" \
@@ -70,15 +70,11 @@ function _s3_caching_uploadArchive {
       ${_s3_caching_url}
 }
 
-function _s3_caching_generateCanonicalRequest { # Args: HTTP method, content hash
+function _s3_caching_generateAuthHeader { # Args: HTTP method, content hash
     local canonicalRequest="$1\n/${_s3_caching_file}\n\n"
     canonicalRequest+="host:${_s3_caching_host}\nx-amz-content-sha256:$2\nx-amz-date:${_s3_caching_timeStamp}\n\n"
     canonicalRequest+="${_s3_caching_signedHeaders}\n$2"
-    echo ${canonicalRequest};
-}
-
-function _s3_caching_generateAuthHeader { #Args: canonical request
-    local hashedRequest=$(echo -en $1 | openssl sha256 | _s3_caching_trimOpenSslOutput)
+    local hashedRequest=$(echo -en ${canonicalRequest} | openssl sha256 | _s3_caching_trimOpenSslOutput)
     local stringToSign="AWS4-HMAC-SHA256\n${_s3_caching_timeStamp}\n${_s3_caching_scope}\n${hashedRequest}"
     local signature=$(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash $(_s3_caching_sha256Hash \
       ${_s3_caching_key} ${_s3_caching_dateStamp}) ${_s3_caching_region}) ${_s3_caching_service}) "aws4_request") ${stringToSign})
