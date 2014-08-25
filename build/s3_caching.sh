@@ -2,17 +2,6 @@
 _s3_caching_dependencyFolder=$HOME/.m2
 _s3_caching_file="cached.tar.bz2"
 
-_s3_caching_timeStamp=$(date -u +%Y%m%dT%H%M%SZ)
-_s3_caching_dateStamp=$(date -u +%Y%m%d)
-_s3_caching_region="us-east-1"
-_s3_caching_service="s3"
-_s3_caching_scope=${_s3_caching_dateStamp}/${_s3_caching_region}/${_s3_caching_service}/aws4_request
-_s3_caching_host="${AWS_BUCKET}.s3.amazonaws.com"
-_s3_caching_credential="${AWS_ACCESS_KEY_ID}/${_s3_caching_scope}"
-_s3_caching_key=$(echo -n "AWS4${AWS_SECRET_ACCESS_KEY}" | xxd -c 256 -ps)
-_s3_caching_signedHeaders="host;x-amz-content-sha256;x-amz-date"
-_s3_caching_url="http://${_s3_caching_host}/${_s3_caching_file}"
-
 function getCachedDependencies {
     if [[ -z $(_s3_caching_diffPomFiles) ]]; then
         echo "pom.xml files unchanged - using cached dependencies"
@@ -32,6 +21,17 @@ function cacheDependencies {
 function _s3_caching_diffPomFiles {
     git diff ${TRAVIS_COMMIT_RANGE} pom.xml **/pom.xml
 }
+
+_s3_caching_timeStamp=$(date -u +%Y%m%dT%H%M%SZ)
+_s3_caching_dateStamp=$(date -u +%Y%m%d)
+_s3_caching_region="us-east-1"
+_s3_caching_service="s3"
+_s3_caching_scope=${_s3_caching_dateStamp}/${_s3_caching_region}/${_s3_caching_service}/aws4_request
+_s3_caching_host="${AWS_BUCKET}.s3.amazonaws.com"
+_s3_caching_credential="${AWS_ACCESS_KEY_ID}/${_s3_caching_scope}"
+_s3_caching_key=$(echo -n "AWS4${AWS_SECRET_ACCESS_KEY}" | xxd -c 256 -ps)
+_s3_caching_signedHeaders="host;x-amz-content-sha256;x-amz-date"
+_s3_caching_url="http://${_s3_caching_host}/${_s3_caching_file}"
 
 function _s3_caching_downloadArchive {
     local contentHash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
