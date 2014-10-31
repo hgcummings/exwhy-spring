@@ -49,7 +49,11 @@ public class TestAccounts {
                 HtmlForm twitterSignInForm = twitterPage.getForms().get(0);
                 twitterSignInForm.getInputByName("session[username_or_email]").setValueAttribute(username);
                 twitterSignInForm.getInputByName("session[password]").setValueAttribute(password);
-                twitterPage.getHtmlElementById("allow").click();
+                while (twitterPage.getElementById("allow") != null) {
+                    // Unlike with Chrome, Twitter seems to direct HtmlUnit to a second sign-in page rather
+                    // than immediately back to the application. Clicking 'allow' again has the desired effect.
+                    twitterPage = twitterPage.getHtmlElementById("allow").click();
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
