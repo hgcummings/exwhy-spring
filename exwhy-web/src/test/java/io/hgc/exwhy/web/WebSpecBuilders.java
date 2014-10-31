@@ -1,8 +1,6 @@
 package io.hgc.exwhy.web;
 
-import com.gargoylesoftware.htmlunit.HttpWebConnection;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
+import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -141,17 +139,29 @@ public class WebSpecBuilders {
                 };
             }
 
-            private void cleanup() {
+            private void cleanup(Throwable error) {
+                if (error != null) {
+                    Page page = webClient.getCurrentWindow().getEnclosedPage();
+                    System.out.println("Error on " + page.getUrl());
+                    if (page instanceof SgmlPage) {
+                        System.out.println(((SgmlPage) page).asXml());
+                    }
+                }
+
                 webClient.closeAllWindows();
+
+                if (error != null) {
+                    throw new RuntimeException(error);
+                }
             }
         }
     }
 
     public static class WebSpecPageActBuilder {
         private Supplier<HtmlPage> htmlPageSupplier;
-        private Runnable cleanup;
+        private Consumer<Throwable> cleanup;
 
-        public WebSpecPageActBuilder(Supplier<HtmlPage> htmlPageSupplier, Runnable cleanup) {
+        public WebSpecPageActBuilder(Supplier<HtmlPage> htmlPageSupplier, Consumer<Throwable> cleanup) {
             this.htmlPageSupplier = htmlPageSupplier;
             this.cleanup = cleanup;
         }
@@ -175,9 +185,9 @@ public class WebSpecBuilders {
 
     public static class WebSpecAssertBuilder {
         private Supplier<HtmlPage> htmlPageSupplier;
-        private Runnable cleanup;
+        private Consumer<Throwable> cleanup;
 
-        public WebSpecAssertBuilder(Supplier<HtmlPage> htmlPageSupplier, Runnable cleanup) {
+        public WebSpecAssertBuilder(Supplier<HtmlPage> htmlPageSupplier, Consumer<Throwable> cleanup) {
             this.htmlPageSupplier = htmlPageSupplier;
             this.cleanup = cleanup;
         }
@@ -188,9 +198,13 @@ public class WebSpecBuilders {
 
         public Runnable withText(String text) {
             return () -> {
-                DomNode element = htmlPageSupplier.get().getFirstByXPath(String.format("//*[text()=\"%s\"]", text));
-                assertNotNull(element);
-                cleanup.run();
+                try {
+                    DomNode element = htmlPageSupplier.get().getFirstByXPath(String.format("//*[text()=\"%s\"]", text));
+                    assertNotNull(element);
+                    cleanup.accept(null);
+                } catch (Throwable e) {
+                    cleanup.accept(e);
+                }
             };
         }
 
@@ -209,16 +223,18 @@ public class WebSpecBuilders {
             }
 
             public HtmlElementAssertionBuilder withText(String expected) {
-               assertions.add((domElement) -> {
-                    assertEquals(expected, domElement.getTextContent());
-                });
-                return this;
+               assertions.add((domElement) -> assertEquals(expected, domElement.getTextContent()));
+               return this;
             }
 
             public void run() {
-                DomElement element = elementSupplier.get();
-                assertions.forEach((assertion) -> assertion.accept(element));
-                cleanup.run();
+                try {
+                    DomElement element = elementSupplier.get();
+                    assertions.forEach((assertion) -> assertion.accept(element));
+                    cleanup.accept(null);
+                } catch (Throwable e) {
+                    cleanup.accept(e);
+                }
             }
         }
     }
