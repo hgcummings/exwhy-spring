@@ -16,6 +16,8 @@
     <properties>
         <start-class>io.hgc.exwhy.web.Application</start-class>
         <java.version>1.8</java.version>
+        <spring.security.version>3.2.5.RELEASE</spring.security.version>
+        <spring.social.version>1.1.0.RELEASE</spring.social.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,6 +37,27 @@
             <artifactId>spring-test</artifactId>
             <version>4.0.6.RELEASE</version>
             <scope>test</scope>
+        </dependency>
+        <!-- Spring Social -->
+        <dependency>
+            <groupId>org.springframework.social</groupId>
+            <artifactId>spring-social-core</artifactId>
+            <version>${spring.social.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.social</groupId>
+            <artifactId>spring-social-web</artifactId>
+            <version>${spring.social.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.social</groupId>
+            <artifactId>spring-social-twitter</artifactId>
+            <version>${spring.social.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

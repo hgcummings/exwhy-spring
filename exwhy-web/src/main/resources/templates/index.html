@@ -1,0 +1,13 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>exwhy - home</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<h1 id="heading">exwhy</h1>
+<a th:unless="${user}" th:href="@{/signin}">Sign in</a>
+<h2 id="greeting" th:if="${user}" th:text="'Hello, ' + ${user.friendlyName} + '!'" />
+<p th:if="${user}" th:inline="text">You are signed in as [[${user.username}]]</p>
+</body>
+</html>
