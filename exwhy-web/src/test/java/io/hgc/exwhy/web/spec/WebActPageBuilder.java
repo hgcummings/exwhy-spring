@@ -6,16 +6,16 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class WebSpecPageActBuilder {
+public class WebActPageBuilder {
     private Supplier<HtmlPage> htmlPageSupplier;
     private Consumer<Throwable> cleanup;
 
-    public WebSpecPageActBuilder(Supplier<HtmlPage> htmlPageSupplier, Consumer<Throwable> cleanup) {
+    WebActPageBuilder(Supplier<HtmlPage> htmlPageSupplier, Consumer<Throwable> cleanup) {
         this.htmlPageSupplier = htmlPageSupplier;
         this.cleanup = cleanup;
     }
 
-    public WebSpecPageActBuilder iSelect(String text) {
+    public WebActPageBuilder iSelect(String text) {
         Supplier<HtmlPage> oldSupplier = htmlPageSupplier;
         this.htmlPageSupplier = () -> {
             try {
@@ -27,7 +27,7 @@ public class WebSpecPageActBuilder {
         return this;
     }
 
-    public WebSpecAssertBuilder then() {
-        return new WebSpecAssertBuilder(htmlPageSupplier, cleanup);
+    public WebAssertBuilder then() {
+        return new WebAssertBuilder(htmlPageSupplier, cleanup);
     }
 }

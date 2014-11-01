@@ -12,16 +12,16 @@ import java.util.function.Supplier;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class WebSpecAssertBuilder {
+public class WebAssertBuilder {
     private Supplier<HtmlPage> htmlPageSupplier;
     private Consumer<Throwable> cleanup;
 
-    public WebSpecAssertBuilder(Supplier<HtmlPage> htmlPageSupplier, Consumer<Throwable> cleanup) {
+    WebAssertBuilder(Supplier<HtmlPage> htmlPageSupplier, Consumer<Throwable> cleanup) {
         this.htmlPageSupplier = htmlPageSupplier;
         this.cleanup = cleanup;
     }
 
-    public WebSpecAssertBuilder iSeeAnElement() {
+    public WebAssertBuilder iSeeAnElement() {
         return this;
     }
 

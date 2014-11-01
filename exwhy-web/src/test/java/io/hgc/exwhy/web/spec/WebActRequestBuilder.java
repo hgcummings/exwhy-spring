@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class WebSpecRequestActBuilder {
+public class WebActRequestBuilder {
     private Function<WebClient, WebConnection> createWebConnection;
     private WebClient webClient;
 
-    public WebSpecRequestActBuilder(Function<WebClient, WebConnection> createWebConnection) {
+    WebActRequestBuilder(Function<WebClient, WebConnection> createWebConnection) {
         this.createWebConnection = createWebConnection;
     }
 
@@ -41,8 +41,8 @@ public class WebSpecRequestActBuilder {
                 .path(path);
         }
 
-        public WebSpecPageActBuilder and() {
-            return new WebSpecPageActBuilder(getHtmlPageSupplier(), this::cleanup);
+        public WebActPageBuilder and() {
+            return new WebActPageBuilder(getHtmlPageSupplier(), this::cleanup);
         }
 
         public WebRequestBuilder withParameter(String name, Object value) {
@@ -50,8 +50,8 @@ public class WebSpecRequestActBuilder {
             return this;
         }
 
-        public WebSpecAssertBuilder then() {
-            return new WebSpecAssertBuilder(getHtmlPageSupplier(), this::cleanup);
+        public WebAssertBuilder then() {
+            return new WebAssertBuilder(getHtmlPageSupplier(), this::cleanup);
         }
 
         private Supplier<HtmlPage> getHtmlPageSupplier() {

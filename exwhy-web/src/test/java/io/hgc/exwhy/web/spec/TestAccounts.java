@@ -1,4 +1,4 @@
-package io.hgc.exwhy.web;
+package io.hgc.exwhy.web.spec;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;

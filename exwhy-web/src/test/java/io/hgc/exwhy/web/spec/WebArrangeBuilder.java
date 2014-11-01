@@ -2,9 +2,9 @@ package io.hgc.exwhy.web.spec;
 
 import com.gargoylesoftware.htmlunit.HttpWebConnection;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
 import com.google.common.collect.Lists;
 import io.hgc.exwhy.web.Application;
-import io.hgc.exwhy.web.TestAccounts;
 import io.hgc.exwhy.web.authentication.SecurityContext;
 import io.hgc.exwhy.web.authentication.User;
 import org.apache.commons.lang3.StringUtils;
@@ -20,47 +20,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class WebSpecArrangeBuilder {
+public class WebArrangeBuilder {
     private static MockMvc mockMvc;
-    private static MockPropertySource mockPropertySource;
     private List<Consumer<WebClient>> arrangeSteps = Lists.newArrayList();
 
-    public WebSpecRequestActBuilder when() {
-        String server = System.getProperty("test.server");
-        if (StringUtils.isBlank(server)) {
-            return new WebSpecRequestActBuilder((webClient) -> {
-                if (mockMvc == null) {
-                    mockMvc = createMockMvc();
-                }
-                return new MockMvcWebConnection(mockMvc);
-            });
-        } else {
-            return new WebSpecRequestActBuilder((webClient) -> {
-                HttpWebConnection connection = new HttpWebConnection(webClient);
-
-                for (Consumer<WebClient> arrangeStep : arrangeSteps) {
-                    arrangeStep.accept(webClient);
-                }
-
-                return connection;
-            });
-        }
+    WebArrangeBuilder() {
     }
 
-    private static MockMvc createMockMvc() {
-        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        context.register(Application.class);
-        mockPropertySource = new MockPropertySource();
-        mockPropertySource.setProperty("TWITTER_CONSUMER_KEY", UUID.randomUUID().toString());
-        mockPropertySource.setProperty("TWITTER_CONSUMER_SECRET", UUID.randomUUID().toString());
-        context.getEnvironment().getPropertySources().addLast(mockPropertySource);
-        MockServletContext servletContext = new MockServletContext();
-        servletContext.setContextPath("/exwhy");
-        context.setServletContext(servletContext);
-        return MockMvcBuilders.webAppContextSetup(context).build();
-    }
-
-    public WebSpecArrangeBuilder iAmSignedInAs(String name) {
+    public WebArrangeBuilder iAmSignedInAs(String name) {
         String server = System.getProperty("test.server");
         if (StringUtils.isBlank(server)) {
             SecurityContext.setCurrentUser(
@@ -71,7 +38,42 @@ public class WebSpecArrangeBuilder {
         return this;
     }
 
-    public WebSpecArrangeBuilder and() {
+    public WebArrangeBuilder and() {
         return this;
+    }
+
+    public WebRequestActBuilder when() {
+        return new WebRequestActBuilder(this::createWebConnectionForClient);
+    }
+
+    private WebConnection createWebConnectionForClient(WebClient webClient) {
+        String server = System.getProperty("test.server");
+        if (StringUtils.isBlank(server)) {
+            if (mockMvc == null) {
+                mockMvc = createMockMvc();
+            }
+            return new MockMvcWebConnection(mockMvc);
+        } else {
+            HttpWebConnection connection = new HttpWebConnection(webClient);
+
+            for (Consumer<WebClient> arrangeStep : arrangeSteps) {
+                arrangeStep.accept(webClient);
+            }
+
+            return connection;
+        }
+    }
+
+    private static MockMvc createMockMvc() {
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.register(Application.class);
+        MockPropertySource mockPropertySource = new MockPropertySource();
+        mockPropertySource.setProperty("TWITTER_CONSUMER_KEY", UUID.randomUUID().toString());
+        mockPropertySource.setProperty("TWITTER_CONSUMER_SECRET", UUID.randomUUID().toString());
+        context.getEnvironment().getPropertySources().addLast(mockPropertySource);
+        MockServletContext servletContext = new MockServletContext();
+        servletContext.setContextPath("/exwhy");
+        context.setServletContext(servletContext);
+        return MockMvcBuilders.webAppContextSetup(context).build();
     }
 }

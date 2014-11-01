@@ -2,7 +2,7 @@ package io.hgc.exwhy.web;
 
 import org.junit.Test;
 
-import static io.hgc.exwhy.web.Setup.given;
+import static io.hgc.exwhy.web.spec.Setup.given;
 
 public class IndexControllerTest {
     @Test
