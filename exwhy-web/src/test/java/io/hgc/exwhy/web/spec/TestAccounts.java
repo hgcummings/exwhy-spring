@@ -13,26 +13,29 @@ import java.util.function.Consumer;
 public class TestAccounts {
     private static final String server = System.getProperty("test.server");
 
-    private static final Map<String, Consumer<WebClient>> accounts = Maps.newHashMap();
+    private static final Map<String, Account> accounts = Maps.newHashMap();
 
     static {{
         accounts.put("Testy McTest",
-            new TwitterAccount(getRequired("USER_1_USERNAME"), getRequired("USER_1_PASSWORD")));
+            new TwitterAccount(System.getenv("USER_1_USERNAME"), System.getenv("USER_1_PASSWORD")));
     }}
 
     public static Consumer<WebClient> get(String name) {
-        return accounts.get(name);
+        return ((webClient) -> {
+            Account account = accounts.get(name);
+            if (account == null || !account.isSpecified()) {
+                throw new IllegalStateException(String.format("Account %s has not been specified", name));
+            }
+            account.signIn(webClient);
+        });
     }
 
-    private static String getRequired(String name) {
-        String value = System.getenv(name);
-        if (value == null) {
-            throw new IllegalStateException(String.format("Environment variable %s must be set", name));
-        }
-        return value;
+    private static interface Account {
+        boolean isSpecified();
+        void signIn(WebClient webClient);
     }
 
-    private static class TwitterAccount implements Consumer<WebClient> {
+    private static class TwitterAccount implements Account {
         private final String username;
         private final String password;
 
@@ -42,7 +45,12 @@ public class TestAccounts {
         }
 
         @Override
-        public void accept(WebClient webClient) {
+        public boolean isSpecified() {
+            return  (username != null && password != null);
+        }
+
+        @Override
+        public void signIn(WebClient webClient) {
             try {
                 HtmlPage signInPage = webClient.getPage(UriBuilder.fromPath(server).path("/signin").build().toString());
                 HtmlPage twitterPage = signInPage.getHtmlElementById("signin-twitter").click();

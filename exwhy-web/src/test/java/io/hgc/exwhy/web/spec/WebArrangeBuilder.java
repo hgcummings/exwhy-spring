@@ -30,8 +30,9 @@ public class WebArrangeBuilder {
     public WebArrangeBuilder iAmSignedInAs(String name) {
         String server = System.getProperty("test.server");
         if (StringUtils.isBlank(server)) {
-            SecurityContext.setCurrentUser(
-                new User("userId", new UserProfileBuilder().setName(name).build()));
+            arrangeSteps.add((webClient) -> SecurityContext.setCurrentUser(
+                new User("userId", new UserProfileBuilder().setName(name).build())));
+
         } else {
             arrangeSteps.add(TestAccounts.get(name));
         }
@@ -42,8 +43,8 @@ public class WebArrangeBuilder {
         return this;
     }
 
-    public WebRequestActBuilder when() {
-        return new WebRequestActBuilder(this::createWebConnectionForClient);
+    public WebActRequestBuilder when() {
+        return new WebActRequestBuilder(this::createWebConnectionForClient);
     }
 
     private WebConnection createWebConnectionForClient(WebClient webClient) {
@@ -51,6 +52,9 @@ public class WebArrangeBuilder {
         if (StringUtils.isBlank(server)) {
             if (mockMvc == null) {
                 mockMvc = createMockMvc();
+            }
+            for (Consumer<WebClient> arrangeStep : arrangeSteps) {
+                arrangeStep.accept(webClient);
             }
             return new MockMvcWebConnection(mockMvc);
         } else {

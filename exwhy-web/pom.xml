@@ -60,9 +60,15 @@
             <version>${spring.security.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <groupId>io.hgc</groupId>
+            <artifactId>jarspec</artifactId>
+            <version>0.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
