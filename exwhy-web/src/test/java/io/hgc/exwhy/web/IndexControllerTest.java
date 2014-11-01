@@ -1,7 +1,6 @@
 package io.hgc.exwhy.web;
 
 import org.junit.Test;
-import org.springframework.social.connect.UserProfileBuilder;
 
 import static io.hgc.exwhy.web.Setup.given;
 

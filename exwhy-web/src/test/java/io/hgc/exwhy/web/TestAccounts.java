@@ -44,13 +44,13 @@ public class TestAccounts {
         @Override
         public void accept(WebClient webClient) {
             try {
-                HtmlPage page = webClient.getPage(UriBuilder.fromPath(server).path("/signin").build().toString());
-                HtmlPage twitterPage = page.getHtmlElementById("signin-twitter").click();
+                HtmlPage signInPage = webClient.getPage(UriBuilder.fromPath(server).path("/signin").build().toString());
+                HtmlPage twitterPage = signInPage.getHtmlElementById("signin-twitter").click();
                 HtmlForm twitterSignInForm = twitterPage.getForms().get(0);
                 twitterSignInForm.getInputByName("session[username_or_email]").setValueAttribute(username);
                 twitterSignInForm.getInputByName("session[password]").setValueAttribute(password);
                 while (twitterPage.getElementById("allow") != null) {
-                    // Unlike with Chrome, Twitter seems to direct HtmlUnit to a second sign-in page rather
+                    // Unlike with Chrome, Twitter seems to direct HtmlUnit to a second authorization page rather
                     // than immediately back to the application. Clicking 'allow' again has the desired effect.
                     twitterPage = twitterPage.getHtmlElementById("allow").click();
                 }
